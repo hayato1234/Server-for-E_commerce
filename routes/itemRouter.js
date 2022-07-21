@@ -1,18 +1,14 @@
 const express = require("express");
 const Item = require("../model/item");
+const cors = require("./cors");
 
 const itemRouter = express.Router();
 
 /** without params---------------------------------- */
 itemRouter
   .route("/")
-  .all((req, res, next) => {
-    //
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/plain");
-    next(); // will go next (GET, POST etc)
-  })
-  .get((req, res, next) => {
+  .options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
+  .get(cors.cors, (req, res, next) => {
     Item.find()
       .then((items) => {
         res.statusCode = 200;
@@ -21,7 +17,7 @@ itemRouter
       })
       .catch((err) => next(err));
   })
-  .post((req, res, next) => {
+  .post(cors.corsWithOptions, (req, res, next) => {
     Item.create(req.body)
       .then((item) => {
         console.log("Item Created ", item);
@@ -31,11 +27,11 @@ itemRouter
       })
       .catch((err) => next(err));
   })
-  .put((req, res) => {
+  .put(cors.corsWithOptions, (req, res) => {
     res.statusCode = 403;
     res.end("PUT operation not supported on /items");
   })
-  .delete((req, res, next) => {
+  .delete(cors.corsWithOptions, (req, res, next) => {
     Item.deleteMany()
       .then((response) => {
         res.statusCode = 200;
@@ -49,7 +45,7 @@ itemRouter
 
 itemRouter
   .route("/:itemId")
-  .get((req, res, next) => {
+  .get(cors.cors, (req, res, next) => {
     Item.findById(req.params.itemId)
       .then((item) => {
         res.statusCode = 200;
@@ -58,11 +54,11 @@ itemRouter
       })
       .catch((err) => next(err));
   })
-  .post((req, res, next) => {
+  .post(cors.corsWithOptions, (req, res, next) => {
     res.statusCode = 403;
     res.end("POST operation not supported on /items");
   })
-  .put((req, res, next) => {
+  .put(cors.corsWithOptions, (req, res, next) => {
     Item.findByIdAndUpdate(req.params.itemId, { $set: req.body }, { new: true })
       .then((item) => {
         res.statusCode = 200;
@@ -71,7 +67,7 @@ itemRouter
       })
       .catch((err) => next(err));
   })
-  .delete((req, res, next) => {
+  .delete(cors.corsWithOptions, (req, res, next) => {
     Item.findByIdAndDelete(req.params.itemId)
       .then((response) => {
         res.statusCode = 200;
